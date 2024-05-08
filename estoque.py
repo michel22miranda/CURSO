@@ -5,7 +5,24 @@ app = FastAPI()
 
 @app.get("/extrato/{dtinicial}/{dtfinal}")
 def extrato(dtinicial:int, dtfinal:int):
-    return {"msg":"ok"}
+    conn = sqlite3.connect("/home/ijovem03/turma202402/database/estoque.db")
+    cur = conn.cursor()
+
+    cur.execute(""" select a.id_produto, b.nome, a.dt_lancamento, a.qtde, a.operacao, b.saldo from registro a, produto b where a.id_produto = b.id """)
+    lista=cur.fetchall()
+    conn.close()
+    return(lista)
+ 
+@app.get("/exibir_saldo")
+def exibir_saldo():
+    conn = sqlite3.connect("/home/ijovem03/turma202402/database/estoque.db")
+    cur = conn.cursor()
+
+    cur.execute(""" select b.id, b.nome, b.saldo from  produto b """)
+    lista=cur.fetchall()
+    conn.close()
+    return(lista)
+
 
 @app.put("/credito/{codigo}/{quantidade}")
 def credito(codigo:int, quantidade:int):
@@ -50,4 +67,4 @@ def atualizar_debito(codigo:int, quantidade:int):
     cur.execute(""" UPDATE produto SET saldo = saldo - ? WHERE id = ? """, (quantidade,codigo))
     conn.commit()
     conn.close()
-    return 0 
+    return 0
